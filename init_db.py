@@ -25,8 +25,12 @@ LOG_PATH_SD = os.path.join(PROJECT_LOGS_DIR, 'init_db_sd.log')    # Log file on 
 # Ensure Logs Directory Exists
 # ===========================
 
-# Create the logs directory within the project if it doesn't already exist
-Path(PROJECT_LOGS_DIR).mkdir(parents=True, exist_ok=True)
+try:
+    print(f"Creating logs directory at {PROJECT_LOGS_DIR}.")
+    Path(PROJECT_LOGS_DIR).mkdir(parents=True, exist_ok=True)
+    print(f"Logs directory created at {PROJECT_LOGS_DIR}.")
+except Exception as e:
+    print(f"ERROR: Failed to create logs directory at {PROJECT_LOGS_DIR}: {e}")
 
 # ===========================
 # Configure Logging
@@ -51,38 +55,44 @@ if Path(USB_MOUNT_POINT).exists():
     # Define the log file path on the USB
     usb_log_file = LOG_PATH_USB
 
-    # Create a FileHandler to write logs to the USB log file
-    usb_log_handler = logging.FileHandler(usb_log_file)
-    usb_log_handler.setLevel(logging.DEBUG)  # Capture all log levels
+    try:
+        # Create a FileHandler to write logs to the USB log file
+        usb_log_handler = logging.FileHandler(usb_log_file)
+        usb_log_handler.setLevel(logging.DEBUG)  # Capture all log levels
 
-    # Apply the formatter to the handler
-    usb_log_handler.setFormatter(formatter)
+        # Apply the formatter to the handler
+        usb_log_handler.setFormatter(formatter)
 
-    # Add the USB FileHandler to the logger
-    logger.addHandler(usb_log_handler)
+        # Add the USB FileHandler to the logger
+        logger.addHandler(usb_log_handler)
 
-    # Log an informational message indicating that logging is directed to the USB
-    logger.info("Logging to USB memory stick.")
-    print("Logging to USB memory stick.")
+        # Log an informational message indicating that logging is directed to the USB
+        logger.info("Logging to USB memory stick.")
+        print("Logging to USB memory stick.")
+    except Exception as e:
+        print(f"ERROR: Failed to set up USB logging: {e}")
 else:
     # USB is not mounted; fallback to logging on the microSD card
 
     # Define the log file path on the microSD card
     sd_log_file = LOG_PATH_SD
 
-    # Create a FileHandler to write logs to the microSD log file
-    sd_log_handler = logging.FileHandler(sd_log_file)
-    sd_log_handler.setLevel(logging.WARNING)  # Capture WARNING and above
+    try:
+        # Create a FileHandler to write logs to the microSD log file
+        sd_log_handler = logging.FileHandler(sd_log_file)
+        sd_log_handler.setLevel(logging.WARNING)  # Capture WARNING and above
 
-    # Apply the formatter to the handler
-    sd_log_handler.setFormatter(formatter)
+        # Apply the formatter to the handler
+        sd_log_handler.setFormatter(formatter)
 
-    # Add the microSD FileHandler to the logger
-    logger.addHandler(sd_log_handler)
+        # Add the microSD FileHandler to the logger
+        logger.addHandler(sd_log_handler)
 
-    # Log a warning message indicating that USB is unavailable and logging is on microSD
-    logger.warning(f"USB mount point {USB_MOUNT_POINT} does not exist. Logging to microSD card.")
-    print(f"WARNING: USB mount point {USB_MOUNT_POINT} does not exist. Logging to microSD card.")
+        # Log a warning message indicating that USB is unavailable and logging is on microSD
+        logger.warning(f"USB mount point {USB_MOUNT_POINT} does not exist. Logging to microSD card.")
+        print(f"WARNING: USB mount point {USB_MOUNT_POINT} does not exist. Logging to microSD card.")
+    except Exception as e:
+        print(f"ERROR: Failed to set up microSD logging: {e}")
 
 # ===========================
 # Define the Database Initialization Function

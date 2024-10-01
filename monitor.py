@@ -136,18 +136,24 @@ def log_downtime(interface, down_time, up_time=None, duration=None):
 
 def check_connectivity():
     """
-    Check network connectivity by pinging a reliable host.
-
-    Returns:
-    - bool: True if the network is online, False otherwise.
+    Check connectivity by pinging the Firewall f40 and a reliable external host.
+    Returns True if both are online, False otherwise.
     """
     import subprocess
+    interface = 'eth0'  # Replace with 'wlan0' if using Wi-Fi
+    firewall_ip = '192.168.1.99'  # Firewall LAN IP
+    external_ip = '8.8.8.8'  # External IP to confirm internet connectivity
+
     try:
-        # Attempt to ping Google's public DNS server
-        subprocess.check_output(['ping', '-c', '1', '8.8.8.8'])
-        return True  # Ping was successful; network is online
+        # Ping the Firewall directly
+        subprocess.check_output(['ping', '-c', '1', '-I', interface, firewall_ip])
+
+        # Ping the external IP to confirm internet connectivity
+        subprocess.check_output(['ping', '-c', '1', '-I', interface, external_ip])
+
+        return True
     except subprocess.CalledProcessError:
-        return False  # Ping failed; network is offline
+        return False
 
 
 def monitor():

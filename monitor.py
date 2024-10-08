@@ -1,3 +1,5 @@
+# monitor.py
+
 import os
 import sqlite3
 import logging
@@ -9,7 +11,7 @@ from datetime import datetime
 # ===========================
 
 # Define the mount point for the USB memory stick
-USB_MOUNT_POINT = '/media/pi/USB'
+USB_MOUNT_POINT =  '/mnt/usb'
 
 # Define the directory within your project to store log files
 PROJECT_LOGS_DIR = os.path.expanduser('~/projects/network-monitoring/logs')

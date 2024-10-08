@@ -1,3 +1,5 @@
+# init_db.py
+
 import os
 import sqlite3
 import logging
@@ -8,7 +10,7 @@ from pathlib import Path
 # ===========================
 
 # Define the mount point for the USB memory stick
-USB_MOUNT_POINT = '/media/onion/USB'  # Updated mount point
+USB_MOUNT_POINT =  '/mnt/usb'  # Updated mount point
 
 # Define the directory within your project to store log files
 PROJECT_LOGS_DIR = os.path.expanduser('~/projects/network-monitoring/logs')

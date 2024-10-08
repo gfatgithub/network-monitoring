@@ -75,5 +75,42 @@ your_auth_token with your actual Twilio Auth Token.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl restart monitor.service
+sudo systemctl enable monitor.service
+sudo systemctl start monitor.service
+```
+
+###  5- Create Systemd Service for status_page.py
+**1- Create another service file:**
+
+```bash
+sudo nano /etc/systemd/system/status_page.service
+```
+
+**2- Add the following content:**
+
+```ini
+[Unit]
+Description=Network Status Webpage
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/projects/network-monitoring/status_page.py
+WorkingDirectory=/home/pi/projects/network-monitoring
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**4- Save and exit.**
+
+**5- Enable and start the service:**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable status_page.service
+sudo systemctl start status_page.service
 ```

@@ -257,7 +257,7 @@ def monitor():
                 logger.error(f"An unexpected error occurred while updating downtime: {e}")
 
             # Send SMS notification about restoration
-            send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
+            # send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
 
         # Wait for a specified interval before performing the next connectivity check
         time.sleep(60)  # Pause for 60 seconds

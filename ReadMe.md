@@ -32,3 +32,48 @@ Install the necessary packages:
 sudo apt-get install python3-pip sqlite3
 pip3 install flask twilio
 ```
+### 4. Update Environment Variables with Twilio Details
+Now that you have your Twilio phone number, you'll need to update your environment variables accordingly.
+
+**Using Systemd Service Environment Variables:**
+If you're configuring environment variables directly in your monitor.service file, update it as follows:
+
+**1- Edit the Service File:**
+
+```bash
+sudo nano /etc/systemd/system/monitor.service
+````
+
+**2- Add/Update Environment Variables:**
+
+```ini
+[Unit]
+Description=Network Connectivity Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/projects/network-monitoring
+ExecStart=/home/pi/projects/network-monitoring/venv/bin/python monitor.py
+Restart=always
+RestartSec=5
+Environment=TWILIO_ACCOUNT_SID=your_account_sid
+Environment=TWILIO_AUTH_TOKEN=your_auth_token
+Environment=TWILIO_PHONE_NUMBER='+1234567890'        # Your Twilio number
+Environment=RECIPIENT_PHONE_NUMBERS='+0987654321,+11234567890'  # Comma-separated recipient numbers
+
+[Install]
+WantedBy=multi-user.target
+Replace:
+your_account_sid with your actual Twilio Account SID.
+your_auth_token with your actual Twilio Auth Token.
+'+1234567890' with your Twilio phone number.
+'+0987654321,+11234567890' with the recipient phone numbers (ensure they are comma-separated and include the country code).
+```
+**3- Reload and Restart Services:**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart monitor.service
+```

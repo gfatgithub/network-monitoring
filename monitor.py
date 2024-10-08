@@ -1,17 +1,18 @@
-# monitor.py
-
 import os
 import sqlite3
 import logging
 from pathlib import Path
 from datetime import datetime
+import subprocess
+import time
+from twilio.rest import Client
 
 # ===========================
 # Configuration and Setup
 # ===========================
 
 # Define the mount point for the USB memory stick
-USB_MOUNT_POINT =  '/mnt/usb'
+USB_MOUNT_POINT = '/mnt/usb'
 
 # Define the directory within your project to store log files
 PROJECT_LOGS_DIR = os.path.expanduser('~/projects/network-monitoring/logs')
@@ -22,7 +23,7 @@ DB_PATH_SD = os.path.join(PROJECT_LOGS_DIR, 'downtime_logs.db')  # Database path
 
 # Define the paths for the log files on both USB and microSD card
 LOG_PATH_USB = os.path.join(PROJECT_LOGS_DIR, 'monitor_usb.log')  # Log file on USB
-LOG_PATH_SD = os.path.join(PROJECT_LOGS_DIR, 'monitor_sd.log')  # Log file on microSD
+LOG_PATH_SD = os.path.join(PROJECT_LOGS_DIR, 'monitor_sd.log')    # Log file on microSD
 
 # ===========================
 # Ensure Logs Directory Exists
@@ -51,6 +52,7 @@ if Path(USB_MOUNT_POINT).exists():
 
     # Create a FileHandler to write logs to the USB log file
     usb_log_handler = logging.FileHandler(usb_log_file)
+    usb_log_handler.setLevel(logging.INFO)
 
     # Add the USB FileHandler to the logger
     logger.addHandler(usb_log_handler)
@@ -65,6 +67,7 @@ else:
 
     # Create a FileHandler to write logs to the microSD log file
     sd_log_handler = logging.FileHandler(sd_log_file)
+    sd_log_handler.setLevel(logging.WARNING)
 
     # Add the microSD FileHandler to the logger
     logger.addHandler(sd_log_handler)
@@ -94,10 +97,39 @@ else:
     # USB is not mounted; use the database path on microSD
     DB_PATH = DB_PATH_SD
 
+# ===========================
+# Twilio Configuration
+# ===========================
+
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+RECIPIENT_PHONE_NUMBERS = os.getenv('RECIPIENT_PHONE_NUMBERS', '').split(',')
+
+# Initialize Twilio Client
+client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
 # ===========================
 # Define Functions
 # ===========================
+
+def send_sms(message):
+    """
+    Send an SMS message to multiple recipients using Twilio.
+
+    Parameters:
+    - message (str): The message content to send.
+    """
+    for number in RECIPIENT_PHONE_NUMBERS:
+        try:
+            client.messages.create(
+                body=message,
+                from_=TWILIO_PHONE_NUMBER,
+                to=number.strip()  # Remove any leading/trailing whitespace
+            )
+            logger.info(f"SMS sent to {number.strip()}: {message}")
+        except Exception as e:
+            logger.error(f"Failed to send SMS to {number.strip()}: {e}")
 
 def log_downtime(interface, down_time, up_time=None, duration=None):
     """
@@ -135,13 +167,11 @@ def log_downtime(interface, down_time, up_time=None, duration=None):
         # Log any other unexpected errors
         logger.error(f"An unexpected error occurred while logging downtime: {e}")
 
-
 def check_connectivity():
     """
-    Check connectivity by pinging the Firewall f40 and a reliable external host.
+    Check connectivity by pinging the Firewall F40 and a reliable external host.
     Returns True if both are online, False otherwise.
     """
-    import subprocess
     interface = 'eth0'  # Replace with 'wlan0' if using Wi-Fi
     firewall_ip = '192.168.1.99'  # Firewall LAN IP
     external_ip = '8.8.8.8'  # External IP to confirm internet connectivity
@@ -156,7 +186,6 @@ def check_connectivity():
         return True
     except subprocess.CalledProcessError:
         return False
-
 
 def monitor():
     """
@@ -184,6 +213,9 @@ def monitor():
 
             # Log the downtime event in the SQLite database
             log_downtime(interface, down_time)
+
+            # Send SMS notification about downtime
+            send_sms(f"Alert: {interface} is down as of {down_time}.")
 
         elif online and is_down:
             # Network has just come back up
@@ -224,10 +256,11 @@ def monitor():
                 # Log any other unexpected errors
                 logger.error(f"An unexpected error occurred while updating downtime: {e}")
 
-        # Wait for a specified interval before performing the next connectivity check
-        import time
-        time.sleep(60)  # Pause for 60 seconds
+            # Send SMS notification about restoration
+            send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
 
+        # Wait for a specified interval before performing the next connectivity check
+        time.sleep(60)  # Pause for 60 seconds
 
 # ===========================
 # Entry Point

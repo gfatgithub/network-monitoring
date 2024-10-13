@@ -60,17 +60,20 @@ Restart=always
 RestartSec=5
 Environment=TWILIO_ACCOUNT_SID=your_account_sid
 Environment=TWILIO_AUTH_TOKEN=your_auth_token
-Environment=TWILIO_PHONE_NUMBER='+1234567890'        # Your Twilio number
-Environment=RECIPIENT_PHONE_NUMBERS='+0987654321,+11234567890'  # Comma-separated recipient numbers
+# Your Twilio number
+Environment=TWILIO_PHONE_NUMBER='+1234567890'        
+# Comma-separated recipient numbers
+Environment=RECIPIENT_PHONE_NUMBERS='+0987654321,+11234567890'  
 
 [Install]
 WantedBy=multi-user.target
+```
 Replace:
 your_account_sid with your actual Twilio Account SID.
 your_auth_token with your actual Twilio Auth Token.
 '+1234567890' with your Twilio phone number.
 '+0987654321,+11234567890' with the recipient phone numbers (ensure they are comma-separated and include the country code).
-```
+
 **3- Reload and Restart Services:**
 
 ```bash

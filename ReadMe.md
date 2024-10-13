@@ -117,3 +117,64 @@ sudo systemctl daemon-reload
 sudo systemctl enable status_page.service
 sudo systemctl start status_page.service
 ```
+
+## Usage
+### Accessing the Status Page
+Once both services are running, you can access the network status webpage to view uptime statistics.
+
+**1- Open a Web Browser:**
+
+On any device connected to the same network as your Raspberry Pi, open a web browser.
+
+**2- Navigate to the Status Page:**
+
+Enter the following URL:
+
+```url
+http://<raspberry_pi_ip_address>:5000
+```
+**Example:**
+
+```url
+http://192.168.86.207:5000
+```
+
+**3- View Uptime Statistics:**
+
+The webpage will display a table with the following columns:
+
+**- Period:**  Timeframe (Today, Last Day, Last Week, Last Month)
+**- Number of Downtimes:** Total number of downtime events within the period.
+**- Total Downtime (seconds):** Cumulative downtime duration in seconds within the period.
+
+## Monitoring Logs
+Logs are crucial for monitoring the system's behavior and diagnosing issues.
+
+**1- View Monitor Logs:**
+
+```bash
+sudo journalctl -u monitor.service -f
+```
+**-** The -f flag follows the log in real-time.
+
+**2- View Status Page Logs:**
+
+```bash
+sudo journalctl -u status_page.service -f
+```
+**3- Access Log Files Directly:**
+
+Depending on your configuration, logs may also be written to log files on the USB drive or microSD card.
+
+**- USB Logs:**
+
+```lua
+/home/pi/projects/network-monitoring/logs/monitor_usb.log
+/home/pi/projects/network-monitoring/logs/init_db_usb.log
+```
+**- microSD Logs:**
+
+```lua
+/home/pi/projects/network-monitoring/logs/monitor_sd.log
+/home/pi/projects/network-monitoring/logs/init_db_sd.log
+```

@@ -4,6 +4,7 @@ from flask import Flask, render_template
 import sqlite3
 from pathlib import Path
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -24,7 +25,7 @@ def get_uptime_stats(period='day'):
     Retrieve uptime statistics from the database.
 
     Parameters:
-    - period (str): 'day', 'week', or 'month'
+    - period (str): 'today', 'day', 'week', or 'month'
 
     Returns:
     - dict: Statistics including total downtime and number of incidents
@@ -33,7 +34,12 @@ def get_uptime_stats(period='day'):
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
 
-        if period == 'day':
+        if period == 'today':
+            # Calculate midnight of the current day
+            now = datetime.now()
+            midnight = datetime(now.year, now.month, now.day)
+            time_threshold = midnight
+        elif period == 'day':
             time_threshold = datetime.now() - timedelta(days=1)
         elif period == 'week':
             time_threshold = datetime.now() - timedelta(weeks=1)
@@ -65,13 +71,13 @@ def get_uptime_stats(period='day'):
 
 @app.route('/')
 def home():
-    from datetime import datetime, timedelta
-
+    stats_today = get_uptime_stats('today')
     stats_day = get_uptime_stats('day')
     stats_week = get_uptime_stats('week')
     stats_month = get_uptime_stats('month')
 
     return render_template('status.html',
+                           stats_today=stats_today,
                            stats_day=stats_day,
                            stats_week=stats_week,
                            stats_month=stats_month)

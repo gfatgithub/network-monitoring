@@ -89,8 +89,9 @@ def get_uptime_stats(period='today'):
             'total_duration': total_duration
         }
     except Exception as e:
-        # Log the exception if necessary
+        # Optionally log the exception details
         # For security reasons, avoid exposing internal errors to the user
+        print(f"Error fetching uptime stats for period '{period}': {e}")
         return {
             'count': 0,
             'total_duration': 0
@@ -98,6 +99,7 @@ def get_uptime_stats(period='today'):
 
 @app.route('/')
 def home():
+    # Fetch statistics for each period
     stats_today = get_uptime_stats('today')
     stats_last_day = get_uptime_stats('last_day')
     stats_last_week = get_uptime_stats('last_week')

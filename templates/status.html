@@ -4,12 +4,18 @@
     <meta charset="UTF-8">
     <title>Network Uptime Status</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
         table {
             width: 60%;
             border-collapse: collapse;
             margin: 25px auto;
             font-size: 18px;
             text-align: center;
+            background-color: #ffffff;
         }
         th, td {
             padding: 12px;
@@ -20,11 +26,12 @@
             color: white;
         }
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f9f9f9;
         }
         h1 {
             text-align: center;
             margin-top: 50px;
+            color: #333333;
         }
     </style>
 </head>
@@ -43,18 +50,18 @@
         </tr>
         <tr>
             <td>Last Day</td>
-            <td>{{ stats_day.count }}</td>
-            <td>{{ stats_day.total_duration }}</td>
+            <td>{{ stats_last_day.count }}</td>
+            <td>{{ stats_last_day.total_duration }}</td>
         </tr>
         <tr>
             <td>Last Week</td>
-            <td>{{ stats_week.count }}</td>
-            <td>{{ stats_week.total_duration }}</td>
+            <td>{{ stats_last_week.count }}</td>
+            <td>{{ stats_last_week.total_duration }}</td>
         </tr>
         <tr>
             <td>Last Month</td>
-            <td>{{ stats_month.count }}</td>
-            <td>{{ stats_month.total_duration }}</td>
+            <td>{{ stats_last_month.count }}</td>
+            <td>{{ stats_last_month.total_duration }}</td>
         </tr>
     </table>
 </body>

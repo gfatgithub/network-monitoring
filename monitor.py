@@ -131,7 +131,10 @@ def send_sms(message):
     """
     Send an SMS message to multiple recipients using Twilio.
     This function only attempts to send SMS if Twilio is enabled.
+    If sending fails, Twilio is disabled to prevent further attempts.
     """
+    global twilio_enabled  # Allow modification of the global flag
+
     if not twilio_enabled:
         logger.warning("Twilio is not enabled. SMS not sent.")
         return
@@ -148,6 +151,9 @@ def send_sms(message):
                 logger.info(f"SMS sent to {number}: {message}")
             except Exception as e:
                 logger.error(f"Failed to send SMS to {number}: {e}")
+                logger.warning("Disabling Twilio SMS notifications due to failure.")
+                twilio_enabled = False
+                break  # Exit the loop to prevent further attempts
 
 def log_downtime(interface, down_time, up_time=None, duration=None):
     """

@@ -97,6 +97,9 @@ def get_uptime_stats(period='today'):
             'total_duration': 0
         }
 
+@app.route('/test')
+def test():
+    return "Hello, World! This is a test page."
 @app.route('/')
 def home():
     # Fetch statistics for each period

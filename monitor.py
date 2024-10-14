@@ -102,13 +102,23 @@ else:
 # Twilio Configuration
 # ===========================
 
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '').strip()
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '').strip()
+TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER', '').strip()
 RECIPIENT_PHONE_NUMBERS = os.getenv('RECIPIENT_PHONE_NUMBERS', '').split(',')
 
-# Initialize Twilio Client
-client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# Initialize Twilio client if credentials are provided
+if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER:
+    try:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        twilio_enabled = True
+        logger.info("Twilio SMS notifications are enabled.")
+    except Exception as e:
+        twilio_enabled = False
+        logger.error(f"Failed to initialize Twilio Client: {e}")
+else:
+    twilio_enabled = False
+    logger.warning("Twilio credentials not provided. SMS notifications are disabled.")
 
 # ===========================
 # Define Functions
@@ -117,30 +127,28 @@ client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 def send_sms(message):
     """
     Send an SMS message to multiple recipients using Twilio.
-
-    Parameters:
-    - message (str): The message content to send.
+    This function only attempts to send SMS if Twilio is enabled.
     """
+    if not twilio_enabled:
+        logger.warning("Twilio is not enabled. SMS not sent.")
+        return
+
     for number in RECIPIENT_PHONE_NUMBERS:
-        try:
-            client.messages.create(
-                body=message,
-                from_=TWILIO_PHONE_NUMBER,
-                to=number.strip()  # Remove any leading/trailing whitespace
-            )
-            logger.info(f"SMS sent to {number.strip()}: {message}")
-        except Exception as e:
-            logger.error(f"Failed to send SMS to {number.strip()}: {e}")
+        number = number.strip()
+        if number:
+            try:
+                client.messages.create(
+                    body=message,
+                    from_=TWILIO_PHONE_NUMBER,
+                    to=number
+                )
+                logger.info(f"SMS sent to {number}: {message}")
+            except Exception as e:
+                logger.error(f"Failed to send SMS to {number}: {e}")
 
 def log_downtime(interface, down_time, up_time=None, duration=None):
     """
     Log downtime events to the SQLite database.
-
-    Parameters:
-    - interface (str): The name of the network interface (e.g., 'Internet').
-    - down_time (str): Timestamp when the interface went down.
-    - up_time (str, optional): Timestamp when the interface came back up.
-    - duration (int, optional): Duration of downtime in seconds.
     """
     try:
         # Connect to the SQLite database at the determined path
@@ -258,7 +266,7 @@ def monitor():
                 logger.error(f"An unexpected error occurred while updating downtime: {e}")
 
             # Send SMS notification about restoration
-            # send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
+            send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
 
         # Wait for a specified interval before performing the next connectivity check
         time.sleep(60)  # Pause for 60 seconds

@@ -12,6 +12,9 @@ from twilio.rest import Client
 # Configuration and Setup
 # ===========================
 
+# Configuration
+CHECK_INTERVAL = 5  # in seconds
+
 # Define the mount point for the USB memory stick
 USB_MOUNT_POINT = '/mnt/usb'
 
@@ -269,7 +272,7 @@ def monitor():
             send_sms(f"Info: {interface} is back up as of {up_time}. Downtime duration: {duration} seconds.")
 
         # Wait for a specified interval before performing the next connectivity check
-        time.sleep(60)  # Pause for 60 seconds
+        time.sleep(CHECK_INTERVAL)  # Pause for CHECK_INTERVAL seconds
 
 # ===========================
 # Entry Point
